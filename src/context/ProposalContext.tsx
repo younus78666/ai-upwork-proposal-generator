@@ -69,6 +69,7 @@ import {
 
 function findFirstSavedKey(): { provider: APIProvider; key: string } | null {
   try {
+    if (typeof window === 'undefined') return null;
     const raw = sessionStorage.getItem('jwc_session_api');
     if (!raw) return null;
     const entry = JSON.parse(raw) as { provider: APIProvider; value: string };
@@ -1096,9 +1097,7 @@ export function ProposalProvider({ children }: { children: ReactNode }) {
           apiProvider: savedKey.provider,
           apiKey: savedKey.key,
         },
-      });
-      console.log('[analyze-site] response:', JSON.stringify(data), 'error:', error);
-      if (error) {
+      });      if (error) {
         toast.error('Site analysis failed. Check your API key and try again.');
       } else if (data?.redFlags?.length > 0) {
         // Normalize: ensure every flag has non-empty title+description

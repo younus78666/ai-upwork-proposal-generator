@@ -445,7 +445,7 @@ export function InputForm({ embedded = false }: InputFormProps) {
                     Select Projects
                     <span className="text-xs font-normal text-muted-foreground">(up to 3)</span>
                   </h3>
-                  <Link href="/projects" target="_blank">
+                  <Link href="/projects" target="_blank" rel="noopener noreferrer">
                     <Button variant="outline" size="sm" className="gap-1.5 shrink-0 text-xs h-7">
                       <Plus className="h-3.5 w-3.5" />
                       {savedProjects.length > 0 ? 'Manage' : 'Add'}
