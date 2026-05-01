@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+
+# App utility pages — no SEO value, blocked from indexing
+Disallow: /api-key
+Disallow: /projects
+Disallow: /auth
+Disallow: /dashboard
+Disallow: /proposals
+Disallow: /generate
+
+Sitemap: https://ultimatefreelancers.com/sitemap.xml
