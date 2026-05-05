@@ -236,6 +236,8 @@ export default function Proposals() {
           variantType,
           apiProvider: savedKey.provider,
           apiKey: savedKey.key,
+
+          apiModel: savedKey.model,
         },
       });
       if (error) {

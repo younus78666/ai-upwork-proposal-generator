@@ -127,6 +127,8 @@ export default function Projects() {
           jobDescription: project.description,
           apiProvider: savedKey.provider,
           apiKey: savedKey.key,
+
+          apiModel: savedKey.model,
         },
       });
 

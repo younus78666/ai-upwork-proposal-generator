@@ -52,6 +52,7 @@ async function extractFnError(error: unknown): Promise<string> {
   return 'API call failed. Please check your API key and try again.';
 }
 import { loadSavedProjects, saveSavedProjectsToStorage } from '@/config/projects';
+import { loadApiModel } from '@/config/providers';
 import { detectSkillMismatch } from '@/utils/skillMatch';
 import { loadSavedNotes, saveNotesToStorage } from '@/config/notes';
 import {
@@ -364,6 +365,7 @@ export function ProposalProvider({ children }: { children: ReactNode }) {
           personalNotes: state.personalNotes,
           apiProvider: savedKey.provider,
           apiKey: savedKey.key,
+          apiModel: savedKey.model,
         },
       });
       if (error) throw error;
@@ -764,6 +766,7 @@ export function ProposalProvider({ children }: { children: ReactNode }) {
         applicationType: state.applicationType,
         apiProvider: state.selectedAPI,
         apiKey: apiKey,
+        apiModel: loadApiModel(state.selectedAPI),
         proposalLength: length
       }
     });
@@ -884,7 +887,8 @@ export function ProposalProvider({ children }: { children: ReactNode }) {
           clientName: state.clientName,
           userName: state.userName,
           apiProvider: state.selectedAPI,
-          apiKey
+          apiKey,
+          apiModel: loadApiModel(state.selectedAPI)
         }
       });
       
@@ -1044,6 +1048,7 @@ export function ProposalProvider({ children }: { children: ReactNode }) {
           variantType,
           apiProvider: state.lastApiProvider || state.selectedAPI,
           apiKey: state.lastApiKey,
+          apiModel: loadApiModel(state.lastApiProvider || state.selectedAPI),
         }
       });
 
@@ -1096,6 +1101,7 @@ export function ProposalProvider({ children }: { children: ReactNode }) {
           siteUrl,
           apiProvider: savedKey.provider,
           apiKey: savedKey.key,
+          apiModel: savedKey.model,
         },
       });      if (error) {
         toast.error('Site analysis failed. Check your API key and try again.');

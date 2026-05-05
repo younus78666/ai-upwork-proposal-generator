@@ -73,6 +73,8 @@ export function StandaloneChat({ session, onSessionUpdate }: StandaloneChatProps
           userName: session.userName,
           apiProvider: savedKey.provider,
           apiKey: savedKey.key,
+
+          apiModel: savedKey.model,
         },
       });
 

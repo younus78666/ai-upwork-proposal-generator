@@ -56,6 +56,8 @@ export default function Notes() {
           personalNotes: text,
           apiProvider: savedKey.provider,
           apiKey: savedKey.key,
+
+          apiModel: savedKey.model,
         },
       });
 
@@ -103,6 +105,8 @@ export default function Notes() {
           variantType: 'medium',
           apiProvider: savedKey.provider,
           apiKey: savedKey.key,
+
+          apiModel: savedKey.model,
         },
       });
 

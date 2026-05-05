@@ -6,16 +6,17 @@ import { Input } from '@/components/ui/input';
 import { Eye, EyeOff, Check, ExternalLink, Trash2, KeyRound } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { APIProvider } from '@/types/proposal';
-import { PROVIDERS, loadApiKey, saveApiKey, clearApiKey, getActiveProvider, getProvider } from '@/config/providers';
+import { PROVIDERS, loadApiKey, loadApiModel, saveApiKey, clearApiKey, getActiveProvider, getProvider } from '@/config/providers';
 import { useProposal } from '@/context/ProposalContext';
 
-const PRIMARY_PROVIDERS: APIProvider[] = ['claude', 'openai', 'gemini', 'groq'];
+const PRIMARY_PROVIDERS: APIProvider[] = ['claude', 'openai', 'gemini', 'groq', 'nvidia', 'openrouter'];
 
 const BADGE_COLORS: Record<string, string> = {
   'BEST QUALITY': 'bg-violet-600',
   'POPULAR': 'bg-blue-600',
   'FREE TIER': 'bg-green-600',
   'FASTEST': 'bg-orange-500',
+  'FREE': 'bg-emerald-600',
 };
 
 interface ApiKeyModalProps {
@@ -30,6 +31,7 @@ export function ApiKeyModal({ open, onOpenChange }: ApiKeyModalProps) {
   const [apiKey, setApiKey] = useState('');
   const [showKey, setShowKey] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [modelId, setModelId] = useState<string>('');
 
   // Sync state when modal opens
   useEffect(() => {
@@ -38,10 +40,13 @@ export function ApiKeyModal({ open, onOpenChange }: ApiKeyModalProps) {
     if (active) {
       setSelected(active);
       setApiKey(loadApiKey(active));
+      const cfg = getProvider(active);
+      setModelId(loadApiModel(active) ?? cfg?.defaultModelId ?? '');
       setSaved(true);
     } else {
       setSelected('claude');
       setApiKey('');
+      setModelId('');
       setSaved(false);
     }
     setShowKey(false);
@@ -53,11 +58,15 @@ export function ApiKeyModal({ open, onOpenChange }: ApiKeyModalProps) {
     setApiKey(loadApiKey(id));
     setSaved(!!loadApiKey(id));
     setShowKey(false);
+    const cfg = getProvider(id);
+    setModelId(loadApiModel(id) ?? cfg?.defaultModelId ?? '');
   };
 
   const handleSave = () => {
     if (!apiKey.trim()) return;
-    saveApiKey(selected, apiKey.trim());
+    const cfg = getProvider(selected);
+    const modelToSave = cfg?.models ? (modelId || cfg.defaultModelId) : undefined;
+    saveApiKey(selected, apiKey.trim(), modelToSave);
     setSelectedAPI(selected);
     setSaved(true);
     onOpenChange(false);
@@ -166,6 +175,25 @@ export function ApiKeyModal({ open, onOpenChange }: ApiKeyModalProps) {
                 Get your {currentProvider.name} API key
                 <ExternalLink className="h-3 w-3" />
               </a>
+            )}
+
+            {currentProvider.models && currentProvider.models.length > 0 && (
+              <div>
+                <label className="block text-[11px] font-semibold text-foreground mb-1.5">
+                  Model
+                </label>
+                <select
+                  value={modelId || currentProvider.defaultModelId || ''}
+                  onChange={e => { setModelId(e.target.value); setSaved(false); }}
+                  className="w-full text-xs rounded-md border border-input bg-background px-2.5 py-1.5 font-mono"
+                >
+                  {currentProvider.models.map(m => (
+                    <option key={m.id} value={m.id}>
+                      {m.name}{m.context ? ` — ${m.context}` : ''}
+                    </option>
+                  ))}
+                </select>
+              </div>
             )}
 
             {saved && apiKey.trim() && (

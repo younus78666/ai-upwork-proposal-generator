@@ -12,18 +12,19 @@ import {
 import { cn } from '@/lib/utils';
 import { APIProvider } from '@/types/proposal';
 import {
-  PROVIDERS, loadApiKey, saveApiKey, clearApiKey,
+  PROVIDERS, loadApiKey, loadApiModel, saveApiKey, clearApiKey,
   getActiveProvider, getProvider,
 } from '@/config/providers';
 import { useProposal } from '@/context/ProposalContext';
 
-const PRIMARY_PROVIDERS: APIProvider[] = ['claude', 'openai', 'gemini', 'groq'];
+const PRIMARY_PROVIDERS: APIProvider[] = ['claude', 'openai', 'gemini', 'groq', 'nvidia', 'openrouter'];
 
 const BADGE_COLORS: Record<string, string> = {
   'BEST QUALITY': 'bg-violet-600',
   'POPULAR': 'bg-blue-600',
   'FREE TIER': 'bg-green-600',
   'FASTEST': 'bg-orange-500',
+  'FREE': 'bg-emerald-600',
 };
 
 export default function ApiKeyPage() {
@@ -34,13 +35,20 @@ export default function ApiKeyPage() {
   const [apiKey, setApiKey] = useState('');
   const [showKey, setShowKey] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [modelId, setModelId] = useState<string>('');
 
   useEffect(() => {
     const active = getActiveProvider();
     if (active) {
       setSelected(active);
       setApiKey(loadApiKey(active));
+      const savedModel = loadApiModel(active);
+      const cfg = getProvider(active);
+      setModelId(savedModel ?? cfg?.defaultModelId ?? '');
       setSaved(true);
+    } else {
+      const cfg = getProvider('claude');
+      setModelId(cfg?.defaultModelId ?? '');
     }
   }, []);
 
@@ -50,11 +58,16 @@ export default function ApiKeyPage() {
     setApiKey(existing);
     setSaved(!!existing);
     setShowKey(false);
+    const cfg = getProvider(id);
+    const savedModel = loadApiModel(id);
+    setModelId(savedModel ?? cfg?.defaultModelId ?? '');
   };
 
   const handleSave = () => {
     if (!apiKey.trim()) return;
-    saveApiKey(selected, apiKey.trim());
+    const cfg = getProvider(selected);
+    const modelToSave = cfg?.models ? (modelId || cfg.defaultModelId) : undefined;
+    saveApiKey(selected, apiKey.trim(), modelToSave);
     setSelectedAPI(selected);
     setSaved(true);
   };
@@ -231,6 +244,28 @@ export default function ApiKeyPage() {
                   Get your free {currentProvider.name} API key
                   <ExternalLink className="h-3 w-3" />
                 </a>
+              )}
+
+              {currentProvider.models && currentProvider.models.length > 0 && (
+                <div className="mt-4 pt-4 border-t border-border">
+                  <label className="block text-xs font-semibold text-foreground mb-2">
+                    Choose Model
+                  </label>
+                  <select
+                    value={modelId || currentProvider.defaultModelId || ''}
+                    onChange={e => { setModelId(e.target.value); setSaved(false); }}
+                    className="w-full text-sm rounded-md border border-input bg-background px-3 py-2 font-mono"
+                  >
+                    {currentProvider.models.map(m => (
+                      <option key={m.id} value={m.id}>
+                        {m.name}{m.context ? ` — ${m.context}` : ''}{m.badge ? ` (${m.badge})` : ''}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-[11px] text-muted-foreground mt-2">
+                    Model can be changed anytime. Free models have rate limits — try a different one if you hit a cap.
+                  </p>
+                </div>
               )}
             </CardContent>
           </Card>

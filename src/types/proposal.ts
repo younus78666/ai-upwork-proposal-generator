@@ -50,7 +50,9 @@ export type APIProvider =
   | 'deepseek'
   | 'kimi'
   | 'mistral'
-  | 'grok';
+  | 'grok'
+  | 'openrouter'
+  | 'nvidia';
 
 export type ApplicationType = 'applying' | 'invitation';
 
